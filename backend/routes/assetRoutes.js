@@ -20,4 +20,8 @@ router.get("/:tokenId", assetController.getAssetById);
  */
 router.post("/", assetController.createAsset);
 
+// On-chain test endpoints
+router.get("/onchain/value", assetController.getOnchainValue);
+router.post("/onchain/value", assetController.setOnchainValue);
+
 module.exports = router;

@@ -1,4 +1,7 @@
 const ipfsService = require("../services/ipfsService");
+const ethService = require("../services/ethereumService");
+const SIMPLE_ABI = require("../contracts/SimpleStorage.json");
+const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS || null;
 
 // Mock data store (in production, use database)
 let assets = [];
@@ -83,6 +86,34 @@ exports.createAsset = async (req, res) => {
       data: newAsset,
       message: "Asset created successfully",
     });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * Read on-chain value from SimpleStorage
+ */
+exports.getOnchainValue = async (req, res) => {
+  try {
+    if (!CONTRACT_ADDRESS) return res.status(500).json({ success: false, error: "CONTRACT_ADDRESS not set in env" });
+    const value = await ethService.callRead(SIMPLE_ABI, CONTRACT_ADDRESS, "getValue", []);
+    res.json({ success: true, data: value.toString() });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * Set on-chain value in SimpleStorage (writes a transaction)
+ */
+exports.setOnchainValue = async (req, res) => {
+  try {
+    const { value } = req.body;
+    if (value === undefined) return res.status(400).json({ success: false, error: "Missing value in body" });
+    if (!CONTRACT_ADDRESS) return res.status(500).json({ success: false, error: "CONTRACT_ADDRESS not set in env" });
+    const receipt = await ethService.sendTx(SIMPLE_ABI, CONTRACT_ADDRESS, "setValue", [value]);
+    res.json({ success: true, txReceipt: receipt });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
