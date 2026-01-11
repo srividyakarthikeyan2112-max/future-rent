@@ -9,7 +9,7 @@ export default function MarketplacePage() {
 
   useEffect(() => {
     // Fetch assets from backend
-    fetch("http://localhost:3001/api/assets")
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/assets`)
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {

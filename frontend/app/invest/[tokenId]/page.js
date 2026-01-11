@@ -15,7 +15,7 @@ export default function InvestPage() {
 
   useEffect(() => {
     // Fetch asset details
-    fetch(`http://localhost:3001/api/assets/${tokenId}`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/assets/${tokenId}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
