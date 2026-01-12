@@ -89,27 +89,7 @@ contract PayoutManager is Ownable, ReentrancyGuard {
 
         // Distribute to investors based on their fractional shares
         if (investorShare > 0) {
-            address[] memory investors = fractionalOwnership.getTokenInvestors(tokenId);
-            
-            for (uint256 i = 0; i < investors.length; i++) {
-                FractionalOwnership.FractionalShare memory share = fractionalOwnership.getShare(
-                    tokenId,
-                    investors[i]
-                );
-
-                if (share.sharePercent > 0) {
-                    uint256 investorPayout = (investorShare * share.sharePercent) / totalShares;
-                    
-                    if (investorPayout > 0) {
-                        escrowVault.releaseFunds(tokenId, payable(investors[i]), investorPayout);
-                        fractionalOwnership.updateClaimedPayouts(
-                            tokenId,
-                            investors[i],
-                            investorPayout
-                        );
-                    }
-                }
-            }
+            _distributeToInvestors(tokenId, investorShare, totalShares);
         }
 
         // Platform fee can be sent to owner address or kept in escrow
@@ -129,6 +109,21 @@ contract PayoutManager is Ownable, ReentrancyGuard {
         );
     }
 
+    // internal helper to avoid stack-too-deep in the large function above
+    function _distributeToInvestors(uint256 tokenId, uint256 investorShare, uint256 totalShares) private {
+        address[] memory investors = fractionalOwnership.getTokenInvestors(tokenId);
+        for (uint256 i = 0; i < investors.length; i++) {
+            FractionalOwnership.FractionalShare memory share = fractionalOwnership.getShare(tokenId, investors[i]);
+            if (share.sharePercent > 0) {
+                uint256 investorPayout = (investorShare * share.sharePercent) / totalShares;
+                if (investorPayout > 0) {
+                    escrowVault.releaseFunds(tokenId, payable(investors[i]), investorPayout);
+                    fractionalOwnership.updateClaimedPayouts(tokenId, investors[i], investorPayout);
+                }
+            }
+        }
+    }
+
     /**
      * @dev Batch distribute payouts for multiple timestamps
      * @param tokenId The NFT token ID
@@ -140,7 +135,7 @@ contract PayoutManager is Ownable, ReentrancyGuard {
     ) external nonReentrant {
         for (uint256 i = 0; i < timestamps.length; i++) {
             if (!payoutProcessed[tokenId][timestamps[i]]) {
-                distributePayout(tokenId, timestamps[i]);
+                this.distributePayout(tokenId, timestamps[i]);
             }
         }
     }

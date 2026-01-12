@@ -51,8 +51,8 @@ describe("FutureRent Platform", function () {
       await escrowVault.getAddress()
     );
 
-    // Configure contracts
-    await escrowVault.setPayoutManager(await payoutManager.getAddress());
+  // Configure contracts
+  await escrowVault.setPayoutManager(await payoutManager.getAddress());
 
     // Note: FractionalOwnership uses Ownable, so functions must be called by owner
     // For production, consider using AccessControl or transferring ownership
@@ -302,6 +302,9 @@ describe("FutureRent Platform", function () {
           3000, // 30%
           ethers.parseEther("5")
         );
+
+      // Transfer ownership of fractional contract to payout manager so it can call onlyOwner methods
+      await fractionalOwnership.transferOwnership(await payoutManager.getAddress());
 
       const timestamp = Math.floor(Date.now() / 1000);
       await oracleVerification
