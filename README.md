@@ -261,6 +261,17 @@ Tests cover:
 - Express.js for backend API
 - Tailwind CSS for styling
 
+## 🚀 Deployment
+
+See `DEPLOYMENT_GUIDE.md` for complete deployment instructions covering:
+- Smart contracts deployment (Sepolia/Mainnet)
+- Backend deployment (Vercel, Railway, Heroku, AWS)
+- Frontend deployment (Vercel, Netlify, AWS)
+- Environment configuration
+- Post-deployment checklist
+
+Quick reference: `DEPLOYMENT_CHECKLIST.md`
+
 ## 🚧 Production Considerations
 
 Before deploying to production:
